@@ -3,7 +3,9 @@ import * as css from "./sidebar.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import Modal from "../Modal/Modal";
+import { MenuType, Songs, SongList } from "../../Models";
 const { dialog } = require("electron").remote;
+var fs = require("fs");
 
 interface Props {}
 interface State {
@@ -11,12 +13,6 @@ interface State {
   showPlaylist: boolean;
   showCategories: boolean;
   showModal: boolean;
-}
-
-enum MenuType {
-  songs,
-  playlists,
-  categories
 }
 
 export default class Sidebar extends React.Component<Props, State> {
@@ -56,11 +52,73 @@ export default class Sidebar extends React.Component<Props, State> {
   openFile() {
     dialog.showOpenDialog(
       {
-        properties: ["openFile", "multiSelections"]
+        properties: ["openFile", "multiSelections"],
+        filters: [
+          {
+            name: "FooFiles",
+            extensions: ["AAC", "MP3", "WAV", "MP4", "AVI", "jpg"]
+          }
+        ]
       },
+
       function(files) {
         if (files !== undefined) {
-          console.log(files);
+          let newState = true;
+          let songIndexStartingPoint = 0;
+          var obj: Songs = {
+            //@ts-ignore
+            songs: []
+          };
+          fs.readFile("saveFile.json", "utf-8", (err: any, data: any) => {
+            if (err) {
+              alert("An error ocurred reading the file :" + err.message);
+              return;
+            }
+            const newData = JSON.parse(data);
+            if (newData.songs.length > 0) {
+              newState = false;
+              songIndexStartingPoint = newData.songs.length;
+              newData.songs.map((song: any) => {
+                obj.songs.push(song);
+              });
+
+              files.forEach((file, index) => {
+                var fileName = file.replace(/^.*[\\\/]/, "");
+                var extension = file.substr(file.length - 3);
+                console.log(extension);
+                obj.songs.push({
+                  id: songIndexStartingPoint + index + 1,
+                  fileName,
+                  filePath: file,
+                  extension
+                });
+              });
+              fs.writeFile("saveFile.json", JSON.stringify(obj), (err: any) => {
+                if (err) {
+                  alert("An error ocurred creating the file " + err.message);
+                }
+                alert("The file has been succesfully saved");
+              });
+            } else {
+              files.forEach((file, index) => {
+                var fileName = file.replace(/^.*[\\\/]/, "");
+                var extension = file.substr(file.length - 3);
+                console.log(extension);
+                obj.songs.push({
+                  id: songIndexStartingPoint + index + 1,
+                  fileName,
+                  filePath: file,
+                  extension
+                });
+              });
+              fs.writeFile("saveFile.json", JSON.stringify(obj), (err: any) => {
+                if (err) {
+                  alert("An error ocurred creating the file " + err.message);
+                }
+                alert("The file has been succesfully saved");
+              });
+            }
+          });
         }
       }
     );
@@ -73,19 +131,29 @@ export default class Sidebar extends React.Component<Props, State> {
   render() {
     return (
       <div className={css.container}>
-        {this.state.showModal && <Modal title={"Add songs"} content={this.getModalContent()} showModal={this.state.showModal} />}
+        {this.state.showModal && (
+          <Modal
+            title={"Add songs"}
+            content={this.getModalContent()}
+            showModal={this.state.showModal}
+          />
+        )}
         <div className={css.listTypes}>
           <ul>
             <li
               onClick={() => {
                 this.showMenu(MenuType.songs);
-              }}>
+              }}
+            >
               Songs <FontAwesomeIcon icon={faAngleDown} />
             </li>
             {this.state.showSongs ? (
               <ul className={css.subMenuList}>
                 <li>Song Name</li>
-                <li className={css.listFunction} onClick={() => this.showModal()}>
+                <li
+                  className={css.listFunction}
+                  onClick={() => this.showModal()}
+                >
                   Add a song
                   <span>
                     <FontAwesomeIcon icon={faPlus} />
@@ -96,7 +164,8 @@ export default class Sidebar extends React.Component<Props, State> {
             <li
               onClick={() => {
                 this.showMenu(MenuType.playlists);
-              }}>
+              }}
+            >
               Playlists <FontAwesomeIcon icon={faAngleDown} />
             </li>
             {this.state.showPlaylist ? (
@@ -110,7 +179,8 @@ export default class Sidebar extends React.Component<Props, State> {
             <li
               onClick={() => {
                 this.showMenu(MenuType.categories);
-              }}>
+              }}
+            >
               Categories <FontAwesomeIcon icon={faAngleDown} />
             </li>
             {this.state.showCategories ? (
