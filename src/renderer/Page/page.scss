@@ -9,8 +9,9 @@ h1 {
 
 .buttonHolder {
   margin-top: 20px;
+  text-align: center;
   button {
-    margin: 0 10px 0 10px;
+    margin: 0 10px 10px 10px;
     padding: 10px 20px;
     font-size: 15px;
     border: none;
@@ -39,10 +40,66 @@ h1 {
   }
 }
 
+.slider {
+  background-color: #2f4154;
+  position: absolute;
+  width: calc(100% - 200px);
+  left: 200px;
+  bottom: 0;
+  height: 130px;
+  overflow: hidden;
+  transition: all 1s;
+  color: white;
+}
+
+.content {
+  text-align: center;
+  .builtContent {
+    text-align: center;
+    margin: 15px auto 0 auto;
+  }
+  .buttonHolder {
+    margin-top: 15px;
+    .deleteMedia {
+      color: red !important;
+    }
+    button {
+      margin: 0 10px 10px 10px;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      word-spacing: 3px;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 3px 3px 8px rgb(36, 36, 36);
+      color: green;
+      cursor: pointer;
+      &:hover {
+        background-color: rgb(230, 230, 230);
+        transform: scale(1.05);
+      }
+    }
+  }
+}
+.closeIcon {
+  margin: 10px 10px 0 -40px;
+  float: right;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.slider.close {
+  bottom: 0;
+  height: 0;
+  transition: all 1s;
+}
+
 .songHolder {
   width: 95%;
-  margin: 50px auto 0 auto;
-  height: 20px;
+  margin: 50px auto 50px auto;
+  height: calc(100vh - 200px);
+  overflow-y: scroll;
+  overflow-x: hidden;
   // background-color: lightblue;
   color: black;
   text-align: center;
@@ -63,6 +120,8 @@ h1 {
     .floatingText {
       padding: 0px;
       position: absolute;
+      width: 170px;
+      overflow-wrap: break-word;
       top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);

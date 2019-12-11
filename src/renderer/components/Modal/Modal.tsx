@@ -6,6 +6,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 interface Props {
   title?: string;
   content?: any;
+  showButtons?: boolean;
   closeModal?: Function;
   saveButton?: Function;
 }
@@ -32,20 +33,26 @@ export default class Modal extends React.Component<Props, State> {
             </div>
           </div>
           <div className={css.content}>{content}</div>
-          <div className={css.footer}>
-            <div className={css.buttonHolder}>
-              <button
-                onClick={e => this.props.saveButton && this.props.saveButton(e)}
-              >
-                Save
-              </button>
-              <button
-                onClick={e => this.props.closeModal && this.props.closeModal(e)}
-              >
-                Close
-              </button>
+          {this.props.showButtons ? (
+            <div className={css.footer}>
+              <div className={css.buttonHolder}>
+                <button
+                  onClick={e =>
+                    this.props.saveButton && this.props.saveButton(e)
+                  }
+                >
+                  Save
+                </button>
+                <button
+                  onClick={e =>
+                    this.props.closeModal && this.props.closeModal(e)
+                  }
+                >
+                  Close
+                </button>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     );

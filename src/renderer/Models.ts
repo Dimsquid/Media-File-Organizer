@@ -3,10 +3,10 @@ export interface Songs {
 }
 
 export interface Song {
-  id: number;
-  fileName: string;
-  filePath: string;
-  extension: string;
+  id?: number;
+  fileName?: string;
+  filePath?: string;
+  extension?: string;
   comment?: string;
 }
 

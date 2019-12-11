@@ -32,6 +32,12 @@ export default class InformationPopOver extends React.Component<Props, State> {
         <div className={css.content}>
           <div>Media name: {this.props.information.fileName}</div>
           <div>File Type: {this.props.information.extension}</div>
+          <div>
+            Comment:
+            {this.props.information.comment
+              ? ` ${this.props.information.comment}`
+              : ""}
+          </div>
         </div>
       </div>
     );

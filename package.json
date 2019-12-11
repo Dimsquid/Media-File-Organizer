@@ -53,7 +53,7 @@
     }
   },
   "build": {
-    "productName": "ProductName",
+    "productName": "MediaFileOrganizer",
     "appId": "org.your.productname",
     "mac": {
       "target": "pkg"

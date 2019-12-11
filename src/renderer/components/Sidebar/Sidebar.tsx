@@ -71,7 +71,6 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
         if (files !== undefined) {
           let songIndexStartingPoint = 0;
           var obj: Songs = {
-            //@ts-ignore
             songs: []
           };
           let currentNames;
@@ -122,7 +121,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
         <div className={css.listTypes}>
           <ul>
             <Router>
-              <Link to="/songs">
+              <Link to="/">
                 <li>Songs</li>
               </Link>
               <li onClick={this.showMenu}>

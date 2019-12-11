@@ -20,7 +20,6 @@ export interface MediaReceived {
 function loadInCurrentSongList() {
   return new Promise(resolve => {
     var obj: Songs = {
-      //@ts-ignore
       songs: []
     };
     fs.readFile("saveFile.json", "utf-8", (err: any, data: any) => {
