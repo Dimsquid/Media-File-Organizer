@@ -7,6 +7,7 @@ interface Props {
   title?: string;
   content?: any;
   closeModal?: Function;
+  saveButton?: Function;
 }
 
 interface State {}
@@ -25,13 +26,26 @@ export default class Modal extends React.Component<Props, State> {
             <div className={css.modalTitle}>{title}</div>
             <div className={css.closeIcon}>
               <FontAwesomeIcon
-                //@ts-ignore
-                onClick={e => this.props.closeModal(e)}
+                onClick={e => this.props.closeModal && this.props.closeModal(e)}
                 icon={faTimes}
               />
             </div>
           </div>
           <div className={css.content}>{content}</div>
+          <div className={css.footer}>
+            <div className={css.buttonHolder}>
+              <button
+                onClick={e => this.props.saveButton && this.props.saveButton(e)}
+              >
+                Save
+              </button>
+              <button
+                onClick={e => this.props.closeModal && this.props.closeModal(e)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );

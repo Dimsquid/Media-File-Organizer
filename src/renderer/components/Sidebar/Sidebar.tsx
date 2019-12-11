@@ -87,7 +87,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
                 console.log("SS");
                 const newData: Songs = JSON.parse(data);
                 songIndexStartingPoint = newData.songs.length;
-                newData.songs.map((song: any) => {
+                newData.songs.forEach((song: any) => {
                   obj.songs.push(song);
                 });
 
@@ -119,13 +119,6 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
   render() {
     return (
       <div className={css.container}>
-        {this.state.showModal && (
-          <Modal
-            title={"Add songs"}
-            content={this.getModalContent()}
-            closeModal={() => this.closeModal()}
-          />
-        )}
         <div className={css.listTypes}>
           <ul>
             <Router>

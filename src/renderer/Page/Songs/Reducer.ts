@@ -1,5 +1,6 @@
 import { Songs } from "../../Models";
 import { Action, ActionTypes } from "./Actions";
+const data = require("../../../saveFolder/saveFile.json");
 
 export interface State {
   songs: Songs | null;
@@ -7,7 +8,7 @@ export interface State {
 }
 
 export const initialState: State = {
-  songs: null,
+  songs: data,
   fetching: false
 };
 
@@ -15,7 +16,7 @@ export function reducer(state: State = initialState, action: Action) {
   switch (action.type) {
     case ActionTypes.MEDIA_REQUEST:
       return {
-        songs: null,
+        songs: data,
         fetching: true
       };
     case ActionTypes.MEDIA_RECEIVED:

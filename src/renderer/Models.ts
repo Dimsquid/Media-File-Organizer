@@ -4,9 +4,15 @@ export interface Songs {
 
 export interface Song {
   id: number;
-  fileName: String;
-  filePath: String;
-  extension: String;
+  fileName: string;
+  filePath: string;
+  extension: string;
+  comment?: string;
+}
+
+export interface MousePosition {
+  top: number;
+  left: number;
 }
 
 export enum MenuType {

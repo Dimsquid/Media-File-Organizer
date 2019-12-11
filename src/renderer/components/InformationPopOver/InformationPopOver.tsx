@@ -1,15 +1,39 @@
 import * as React from "react";
+import { Song, MousePosition } from "../../Models";
+import * as css from "./informationpopover.scss";
 
 interface Props {
-  information: [];
+  information: Song;
+  moveToPosition: MousePosition;
 }
 
-export default class InformationPopOver extends React.Component<Props, {}> {
+interface State {
+  moveToPosition: any;
+}
+
+export default class InformationPopOver extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      moveToPosition: { left: -10, top: -10 }
+    };
   }
 
   render() {
-    return <div>{this.props.information}</div>;
+    return (
+      <div
+        style={{
+          top: this.props.moveToPosition.top,
+          left: this.props.moveToPosition.left
+        }}
+        className={css.popOverContainer}
+      >
+        <div className={css.title}>Information</div>
+        <div className={css.content}>
+          <div>Media name: {this.props.information.fileName}</div>
+          <div>File Type: {this.props.information.extension}</div>
+        </div>
+      </div>
+    );
   }
 }
