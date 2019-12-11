@@ -1,20 +1,13 @@
-import { applyMiddleware, createStore, Store } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
+import logger from "redux-logger";
+import thunkMiddleware from "redux-thunk";
+import { createStore, applyMiddleware } from "redux";
+import { reducer } from "../reducers";
 
-import { rootReducer, RootState } from '../reducers';
+/*
+ * We're giving State interface to create store
+ * store is type of State defined in our reducers
+ */
 
-const configureStore = (initialState?: RootState): Store<RootState | undefined> => {
-    const middlewares: any[] = [];
-    const enhancer = composeWithDevTools(applyMiddleware(...middlewares));
-    return createStore(rootReducer, initialState, enhancer);
-};
-
-const store = configureStore();
-
-if (typeof module.hot !== 'undefined') {
-    module.hot.accept('../reducers', () =>
-        store.replaceReducer(require('../reducers').rootReducer)
-    );
-}
+const store = createStore(reducer, applyMiddleware(thunkMiddleware, logger)); //Add ",logger" after thunkMiddleware when debugging redux store
 
 export default store;

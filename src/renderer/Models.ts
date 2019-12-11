@@ -1,17 +1,12 @@
 export interface Songs {
-  songs: [
-    {
-      id: number;
-      fileName: String;
-      filePath: String;
-      extension: String;
-      //   Comment: String;
-    }
-  ];
+  songs: Song[];
 }
 
-export interface SongList {
-  Songs: { songs: Songs[] };
+export interface Song {
+  id: number;
+  fileName: String;
+  filePath: String;
+  extension: String;
 }
 
 export enum MenuType {
