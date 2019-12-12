@@ -2,7 +2,7 @@ import * as React from "react";
 import { JJect, Category } from "../../Models";
 import * as css from "./categories.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash, faSave } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faSave } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   jsonData: JJect;
@@ -27,7 +27,7 @@ export default class CategorieList extends React.Component<Props, State> {
       jsonData: null,
       showEditBar: false,
       selectedCategory: NaN,
-      newCategoryObject: { id: 0, name: "" },
+      newCategoryObject: { value: 0, label: "" },
       update: null
     };
     this.toggleModal = this.toggleModal.bind(this);
@@ -54,26 +54,21 @@ export default class CategorieList extends React.Component<Props, State> {
   onChange(e: any) {
     this.setState({
       newCategoryObject: {
-        id: this.state.selectedCategory,
-        name: e.target.value
+        value: this.state.selectedCategory,
+        label: e.target.value
       }
     });
   }
 
   saveNewName() {
-    const {
-      newCategoryObject,
-      selectedCategory,
-      jsonData,
-      categorieData
-    } = this.state;
+    const { newCategoryObject, selectedCategory, jsonData, categorieData } = this.state;
     categorieData[selectedCategory] = newCategoryObject;
     let obj: JJect = {
       songs: jsonData.songs,
       playlist: jsonData.playlist,
       categories: categorieData
     };
-    this.props.updateJSON && this.props.updateJSON("", obj);
+    this.props.updateJSON && this.props.updateJSON(obj);
     this.setState({ showEditBar: false });
   }
 
@@ -84,23 +79,17 @@ export default class CategorieList extends React.Component<Props, State> {
       <div>
         <ul>
           <div className={css.nameChangeBar}>
-            <button onClick={() => this.toggleModal(NaN)}>
-              Add new category
-            </button>
+            <button onClick={() => this.toggleModal(NaN)}>Add new category</button>
             {!showEditBar ? (
               categorieData &&
               categorieData.length > 0 &&
               categorieData.map((category: Category) => {
                 {
                   return (
-                    <li>
-                      {category.name}
+                    <li key={`${category.label}_${category.value}`}>
+                      {category.label}
                       <div className={css.editIcon}>
-                        <FontAwesomeIcon
-                          onClick={() => this.toggleModal(category.id)}
-                          className={css.icons}
-                          icon={faPen}
-                        ></FontAwesomeIcon>
+                        <FontAwesomeIcon onClick={() => this.toggleModal(category.value)} className={css.icons} icon={faPen}></FontAwesomeIcon>
                       </div>
                     </li>
                   );
@@ -109,16 +98,8 @@ export default class CategorieList extends React.Component<Props, State> {
             ) : (
               <div className={css.nameChangeBar}>
                 <li>
-                  <input
-                    onChange={e => this.onChange(e)}
-                    placeholder="Change category name"
-                    type="text"
-                  />
-                  <FontAwesomeIcon
-                    onClick={this.saveNewName}
-                    className={css.icons}
-                    icon={faSave}
-                  />
+                  <input onChange={e => this.onChange(e)} placeholder="Change category name" type="text" />
+                  <FontAwesomeIcon onClick={this.saveNewName} className={css.icons} icon={faSave} />
                 </li>
               </div>
             )}

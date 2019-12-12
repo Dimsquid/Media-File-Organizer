@@ -26,30 +26,15 @@ export default class Modal extends React.Component<Props, State> {
           <div className={css.topBar}>
             <div className={css.modalTitle}>{title}</div>
             <div className={css.closeIcon}>
-              <FontAwesomeIcon
-                onClick={e => this.props.closeModal && this.props.closeModal(e)}
-                icon={faTimes}
-              />
+              <FontAwesomeIcon onClick={e => this.props.closeModal && this.props.closeModal(e)} icon={faTimes} />
             </div>
           </div>
           <div className={css.content}>{content}</div>
           {this.props.showButtons ? (
             <div className={css.footer}>
               <div className={css.buttonHolder}>
-                <button
-                  onClick={e =>
-                    this.props.saveButton && this.props.saveButton(e)
-                  }
-                >
-                  Save
-                </button>
-                <button
-                  onClick={e =>
-                    this.props.closeModal && this.props.closeModal(e)
-                  }
-                >
-                  Close
-                </button>
+                <button onClick={e => this.props.saveButton && this.props.saveButton(e)}>Save</button>
+                <button onClick={e => this.props.closeModal && this.props.closeModal(e)}>Close</button>
               </div>
             </div>
           ) : null}

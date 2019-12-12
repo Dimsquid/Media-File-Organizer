@@ -1,17 +1,15 @@
 import * as React from "react";
 import * as css from "./sidebar.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faSave, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { Link, HashRouter as Router } from "react-router-dom";
-import { Playlist, Song, Songs, JJect } from "../../Models";
-const fs = require("fs");
-const app = require("electron").remote.app;
-const path = require("path");
-const jsonPath = path.join(app.getPath("userData"), "saveFile.json");
+import { Playlist, JJect } from "../../Models";
 
 interface Props {
   jsonData: JJect;
   showModal?: Function;
+  saveCurrentState?: Function;
+  loadStateFile?: Function;
 }
 interface SidebarState {
   showModal: boolean;
@@ -36,13 +34,8 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
     const { jsonData } = this.props;
     if (jsonData.playlist && jsonData.playlist.length > 0) {
       return jsonData.playlist.map((playl: Playlist) => {
-        console.log(playl.id);
         return (
-          <Link
-            to={"/playlist/" + playl.id}
-            key={`${playl.name}_${playl.id}`}
-            id={playl.id + ""}
-          >
+          <Link to={"/playlist/" + playl.id} key={`${playl.name}_${playl.id}`} id={playl.id + ""}>
             <li>
               <span>{playl.name}</span>
             </li>
@@ -63,6 +56,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
   }
 
   render() {
+    const { saveCurrentState, loadStateFile } = this.props;
     return (
       <div className={css.container}>
         <div className={css.listTypes}>
@@ -74,12 +68,14 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
               <li onClick={this.showMenu}>
                 Playlists <FontAwesomeIcon icon={faAngleDown} />
               </li>
-              {this.state.showPlaylist ? (
-                <ul className={css.subMenuList}>
-                  {this.renderInPlaylistList()}
-                </ul>
-              ) : null}
+              {this.state.showPlaylist ? <ul className={css.subMenuList}>{this.renderInPlaylistList()}</ul> : null}
               <li onClick={() => this.modal()}>Categories</li>
+              <li onClick={() => saveCurrentState && saveCurrentState()}>
+                Save State <FontAwesomeIcon icon={faSave} />
+              </li>
+              <li onClick={() => loadStateFile && loadStateFile()}>
+                Load State <FontAwesomeIcon icon={faUpload} />
+              </li>
             </Router>
           </ul>
         </div>
