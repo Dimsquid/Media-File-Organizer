@@ -6,6 +6,7 @@ import InformationPopOver from "../../components/InformationPopOver/InformationP
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { Redirect } from "react-router";
+import { deleteSong } from "../../containers/FileFunctions";
 
 const fs = require("fs");
 const app = require("electron").remote.app;
@@ -74,7 +75,8 @@ export default class Playlists extends React.Component<Props, State> {
         songs: oldJSONData.songs,
         playlist: oldJSONData.playlist.filter(
           (playl: Playlist) => playl != oldJSONData.playlist[id]
-        )
+        ),
+        categories: oldJSONData.categories
       };
 
       updateJSON && updateJSON(jsonPath, obj);
@@ -108,7 +110,9 @@ export default class Playlists extends React.Component<Props, State> {
           <div className={css.songHolder}>
             <ul>
               {oldJSONData &&
-              oldJSONData.songs &&
+              oldJSONData.playlist &&
+              oldJSONData.playlist[id] &&
+              oldJSONData.playlist[id].songs &&
               oldJSONData.playlist[id].songs.length > 0 ? (
                 oldJSONData.playlist[id].songs.map((media: Song) => {
                   if (media.extension !== "mp4")
@@ -122,13 +126,13 @@ export default class Playlists extends React.Component<Props, State> {
                         key={`${media.fileName}_${media.id}`}
                         id={media.id + ""}
                       >
-                        <div className={css.closeIcon}>
+                        {/* <div className={css.closeIcon}>
                           <FontAwesomeIcon
-                            onClick={() => console.log(media.id)}
+                            onClick={() => this.deleteItem(media.id)}
                             onMouseEnter={() => this.onMouseLeave()}
                             icon={faTrash}
                           />
-                        </div>
+                        </div> */}
                         <span className={css.floatingText}>
                           {media.fileName}
                         </span>

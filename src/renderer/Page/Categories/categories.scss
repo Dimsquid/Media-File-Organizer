@@ -1,0 +1,36 @@
+li {
+  cursor: auto !important;
+  .editIcon {
+    margin: 0 10px 0 -40px;
+    float: right;
+    display: inline-block;
+  }
+  .icons {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+}
+
+.nameChangeBar {
+  margin: -10px;
+  height: 100%;
+  border-radius: 0 0 6px 6px;
+  max-height: 300px;
+  overflow-y: scroll;
+  text-align: center;
+  background-color: #324559;
+
+  button {
+    margin: 10px 0 10px 0;
+    padding: 10px;
+  }
+  :nth-child(2) {
+    border-top: 2px solid #2c3e50;
+  }
+  li {
+    text-align: left;
+    input {
+      width: 80%;
+    }
+  }
+}

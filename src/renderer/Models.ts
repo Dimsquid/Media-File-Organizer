@@ -2,6 +2,7 @@ import { Playlists } from "./Models";
 export interface JJect {
   songs?: Song[];
   playlist?: Playlist[];
+  categories?: Category[];
 }
 
 export interface Songs {
@@ -11,11 +12,18 @@ export interface Songs {
 export interface Playlists {
   playlist: Playlists[];
 }
+export interface Categorys {
+  categories: Category[];
+}
 
 export interface Playlist {
   id?: number;
   name?: string;
   songs?: Song[];
+}
+export interface Category {
+  id?: number;
+  name?: string;
 }
 
 export interface Song {
@@ -31,8 +39,9 @@ export interface MousePosition {
   left: number;
 }
 
-export enum MenuType {
-  songs,
-  playlists,
-  categories
+export enum ModalType {
+  CreatePlaylist,
+  AddSong,
+  AddSongToPlaylist,
+  Null
 }

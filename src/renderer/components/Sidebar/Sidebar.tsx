@@ -11,6 +11,7 @@ const jsonPath = path.join(app.getPath("userData"), "saveFile.json");
 
 interface Props {
   jsonData: JJect;
+  showModal?: Function;
 }
 interface SidebarState {
   showModal: boolean;
@@ -25,11 +26,6 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
       showPlaylist: false
     };
     this.showMenu = this.showMenu.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-  }
-
-  closeModal() {
-    this.setState({ showModal: !this.state.showModal });
   }
 
   showMenu() {
@@ -40,6 +36,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
     const { jsonData } = this.props;
     if (jsonData.playlist && jsonData.playlist.length > 0) {
       return jsonData.playlist.map((playl: Playlist) => {
+        console.log(playl.id);
         return (
           <Link
             to={"/playlist/" + playl.id}
@@ -61,8 +58,11 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
     }
   }
 
+  modal() {
+    this.props.showModal && this.props.showModal();
+  }
+
   render() {
-    console.log(this.props.jsonData);
     return (
       <div className={css.container}>
         <div className={css.listTypes}>
@@ -79,9 +79,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
                   {this.renderInPlaylistList()}
                 </ul>
               ) : null}
-              <Link to="/categories">
-                <li>Categories</li>
-              </Link>
+              <li onClick={() => this.modal()}>Categories</li>
             </Router>
           </ul>
         </div>

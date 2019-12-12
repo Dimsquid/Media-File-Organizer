@@ -11,3 +11,13 @@ button {
     transform: scale(1.05);
   }
 }
+
+input {
+  height: 20px;
+  width: 150px;
+  border: none;
+  border: 1px solid black;
+  font-size: 15px;
+  border-radius: 5px;
+  padding: 5px;
+}

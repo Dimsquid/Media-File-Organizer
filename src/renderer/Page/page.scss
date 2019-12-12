@@ -26,6 +26,8 @@ h1 {
 }
 
 .modalBody {
+  margin: 10px auto;
+  height: 220px;
   .inputHolder {
     width: 100%;
     text-align: center;
@@ -34,6 +36,7 @@ h1 {
       width: 90%;
       padding: 10px;
       font-size: 12px;
+      margin-top: 0px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -141,6 +144,29 @@ h1 {
       max-height: 150px;
       pointer-events: none;
       cursor: pointer;
+    }
+  }
+}
+
+.createPlaylistModal {
+  text-align: center;
+  margin: 10px auto;
+  height: 120px;
+
+  h4 {
+    margin-top: 45px;
+    font-weight: normal;
+  }
+}
+
+.addSongsList {
+  height: auto;
+  max-height: 300px;
+  overflow-y: scroll;
+  margin: -10px -10px 37px -10px;
+  li {
+    span {
+      float: none;
     }
   }
 }

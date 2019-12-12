@@ -12,3 +12,5 @@ export const deletePlaylist: string;
 export const songHolder: string;
 export const thumbNail: string;
 export const floatingText: string;
+export const createPlaylistModal: string;
+export const addSongsList: string;
