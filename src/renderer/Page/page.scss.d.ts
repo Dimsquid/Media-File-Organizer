@@ -8,6 +8,7 @@ export const builtContent: string;
 export const deleteMedia: string;
 export const closeIcon: string;
 export const close: string;
+export const deletePlaylist: string;
 export const songHolder: string;
 export const thumbNail: string;
 export const floatingText: string;

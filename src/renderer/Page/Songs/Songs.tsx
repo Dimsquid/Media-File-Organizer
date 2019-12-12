@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as css from "../page.scss";
 import InformationPopOver from "../../components/InformationPopOver/InformationPopOver";
-import mp3 from "../../../images/mp3.svg";
-import { Song, MousePosition, Songs } from "../../Models";
+import fileIcon from "../../../images/file.svg";
+import { Song, MousePosition, Songs, Playlist, JJect } from "../../Models";
 import Modal from "../../components/Modal/Modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -14,7 +14,8 @@ const path = require("path");
 const jsonPath = path.join(app.getPath("userData"), "saveFile.json");
 
 interface Props {
-  songs?: any;
+  jsonData: JJect;
+  updateJSON: Function;
 }
 
 interface SongState {
@@ -27,6 +28,8 @@ interface SongState {
   toggleClass: boolean;
   selectedSong: number;
   showPlaylistModal: boolean;
+  showCreate: boolean;
+  newPlaylistObject: Playlist;
 }
 
 export default class SongsClass extends React.Component<Props, SongState> {
@@ -47,18 +50,16 @@ export default class SongsClass extends React.Component<Props, SongState> {
       oldJSONData: null,
       toggleClass: true,
       selectedSong: NaN,
-      showPlaylistModal: false
+      showPlaylistModal: false,
+      showCreate: false,
+      newPlaylistObject: { id: 0, name: "", songs: [] }
     };
     this.closeModal = this.closeModal.bind(this);
     this.openFile = this.openFile.bind(this);
   }
 
-  refreshData() {
-    this.setState({ oldJSONData: JSON.parse(fs.readFileSync(jsonPath)) });
-  }
-
   componentDidMount() {
-    this.refreshData();
+    this.setState({ oldJSONData: this.props.jsonData });
   }
 
   onMouseMove(event: any) {
@@ -98,7 +99,6 @@ export default class SongsClass extends React.Component<Props, SongState> {
   }
 
   openFile(outsideThis: this) {
-    // const path = "saveFile.json";
     dialog.showOpenDialog(
       {
         properties: ["openFile"],
@@ -153,81 +153,166 @@ export default class SongsClass extends React.Component<Props, SongState> {
     }
   }
 
-  fileWriter(path: string, JSONObj: Object) {
-    const { showModal } = this.state;
-    fs.writeFile(path, JSON.stringify(JSONObj), (err: any) => {
-      if (err) {
-        alert("An error ocurred creating the file " + err.message);
-      }
-      this.refreshData();
-      if (showModal) {
-        this.closeModal();
-        this.setState({ openedFileData: {} });
-      }
-      // alert("The file has been succesfully saved");
-    });
-  }
+  // add after fileWirtite
 
   addNewSong() {
-    let obj: Songs = {
-      songs: []
-    };
-    const { openedFileData, oldJSONData } = this.state;
-    fs.access(jsonPath, fs.F_OK, (notExsist: any) => {
-      if (notExsist || (oldJSONData && oldJSONData.songs) == null) {
-        obj.songs.push({
-          id: openedFileData.id,
-          fileName: openedFileData.fileName,
-          filePath: openedFileData.filePath,
-          extension: openedFileData.extension,
-          comment: openedFileData.comment
-        });
-        this.fileWriter(jsonPath, obj);
-      } else {
-        const songIndexStartingPoint = oldJSONData.songs.length;
-        this.state.oldJSONData.songs.map((song: any) => {
-          obj.songs.push(song);
-        });
-        obj.songs.push({
-          id: songIndexStartingPoint,
-          fileName: openedFileData.fileName,
-          filePath: openedFileData.filePath,
-          extension: openedFileData.extension,
-          comment: openedFileData.comment
-        });
-        this.fileWriter(jsonPath, obj);
-      }
-    });
+    const { openedFileData, oldJSONData, showModal } = this.state;
+    const { updateJSON } = this.props;
+    const songIndexStartingPoint = oldJSONData.songs.length;
+
+    if (
+      oldJSONData.songs.some(
+        (song: Song) => song.filePath === openedFileData.filePath
+      )
+    ) {
+      alert("File already added to organiser..");
+    } else {
+      oldJSONData.songs.push({
+        id: songIndexStartingPoint,
+        fileName: openedFileData.fileName,
+        filePath: openedFileData.filePath,
+        extension: openedFileData.extension,
+        comment: openedFileData.comment
+      });
+    }
+    updateJSON && updateJSON(jsonPath, oldJSONData);
+    if (showModal) {
+      this.closeModal();
+      this.setState({ openedFileData: {} });
+    }
   }
 
   deleteItem() {
-    const { selectedSong } = this.state;
+    const { selectedSong, oldJSONData } = this.state;
+    const { updateJSON } = this.props;
     if (confirm("Are you sure you want to delete this file?")) {
-      this.setState(prevState => {
-        const media = prevState.oldJSONData.songs.filter(
-          (obj: Song) => obj.id != selectedSong
-        );
-        let obj: Songs = {
-          songs: []
-        };
-        media.map((song: any) => {
-          obj.songs.push(song);
-        });
-        this.fileWriter(jsonPath, obj);
+      if (oldJSONData.songs[selectedSong]) {
+        console.log(oldJSONData.playlist);
 
-        return media;
-      });
+        let obj: JJect = {
+          songs: oldJSONData.songs.filter(
+            (song: Song) => song != oldJSONData.songs[selectedSong]
+          ),
+          playlist: oldJSONData.playlist
+        };
+
+        updateJSON && updateJSON(jsonPath, obj);
+      }
       this.setState({ selectedSong: NaN });
     }
   }
 
+  addSongToPlaylist(e: any) {
+    const { selectedSong, oldJSONData } = this.state;
+    const { updateJSON } = this.props;
+    let newestObj = oldJSONData.songs[selectedSong];
+
+    if (
+      oldJSONData.playlist[e.target.id] &&
+      oldJSONData.playlist[e.target.id].songs.length >
+        oldJSONData.songs[selectedSong].id
+    ) {
+      newestObj = Object.assign({}, oldJSONData.songs[selectedSong], {
+        id: oldJSONData.playlist[e.target.id].songs.length
+      });
+    } else {
+      newestObj = Object.assign({}, oldJSONData.songs[selectedSong], {
+        id: 0
+      });
+      oldJSONData.playlist[e.target.id].songs.push(newestObj);
+      updateJSON && updateJSON(jsonPath, oldJSONData);
+      this.setState({
+        selectedSong: NaN,
+        showPlaylistModal: !this.state.showPlaylistModal
+      });
+      return;
+    }
+    oldJSONData.playlist[e.target.id].songs.map((song: any) => {
+      if (oldJSONData.songs[selectedSong].filePath != song.filePath) {
+        oldJSONData.playlist[e.target.id].songs.push(newestObj);
+        updateJSON && updateJSON(jsonPath, oldJSONData);
+      } else {
+        alert("File already added to this playlist..");
+      }
+    });
+
+    this.setState({
+      selectedSong: NaN,
+      showPlaylistModal: !this.state.showPlaylistModal
+    });
+  }
+
   togglePlaylistModal() {
-    console.log("clicked");
     this.setState({ showPlaylistModal: !this.state.showPlaylistModal });
   }
 
+  toggleCreatePlaylist() {
+    this.setState({ showCreate: !this.state.showCreate });
+  }
+
+  createNewPlaylist() {
+    const { oldJSONData, newPlaylistObject, showModal } = this.state;
+    const { updateJSON } = this.props;
+    this.setState(prevState => ({
+      newPlaylistObject: {
+        ...prevState.newPlaylistObject,
+        id: oldJSONData.playlist.length
+      }
+    }));
+    oldJSONData.playlist.push(newPlaylistObject);
+    updateJSON && updateJSON(jsonPath, oldJSONData);
+    if (showModal) {
+      this.closeModal();
+      this.setState({ openedFileData: {} });
+    }
+  }
+
+  playNameChange(e: any) {
+    const value = e.target.value ? e.target.value : "";
+    this.setState(prevState => ({
+      newPlaylistObject: {
+        ...prevState.newPlaylistObject,
+        name: value
+      }
+    }));
+  }
+
   playlistModalContent() {
-    return "test";
+    const { oldJSONData } = this.state;
+    if (oldJSONData.playlist && oldJSONData.playlist.length > 0) {
+      return oldJSONData.playlist.map((playl: Playlist) => {
+        return (
+          <li
+            className={css.thumbNail}
+            key={`${playl.name}_${playl.id}`}
+            id={playl.id + ""}
+            onClick={e => this.addSongToPlaylist(e)}
+          >
+            <span className={css.floatingText}>{playl.name}</span>
+          </li>
+        );
+      });
+    } else {
+      return (
+        <div>
+          <li>You have no playlists</li>
+          {!this.state.showCreate ? (
+            <li onClick={() => this.toggleCreatePlaylist()}>
+              Create new playlist <FontAwesomeIcon icon={faPlus} />
+            </li>
+          ) : (
+            <div>
+              <input
+                onChange={e => this.playNameChange(e)}
+                placeholder="Playlist name"
+                type="text"
+              />
+              <button onClick={() => this.createNewPlaylist()}>Create</button>
+            </div>
+          )}
+        </div>
+      );
+    }
   }
 
   getSelectedContent() {
@@ -291,7 +376,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
         {showPlaylistModal && (
           <Modal
             title={"Add to playlist"}
-            content={this.playlistModalContent()}
+            content={<ul>{this.playlistModalContent()}</ul>}
             closeModal={() => this.togglePlaylistModal()}
             showButtons={false}
           />
@@ -307,7 +392,9 @@ export default class SongsClass extends React.Component<Props, SongState> {
         </div>
         <div className={css.songHolder}>
           <ul>
-            {oldJSONData && oldJSONData.songs.length > 0 ? (
+            {oldJSONData &&
+            oldJSONData.songs != null &&
+            oldJSONData.songs.length > 0 ? (
               oldJSONData.songs.map((media: Song) => {
                 if (media.extension !== "mp4")
                   return (
@@ -322,7 +409,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
                       id={media.id + ""}
                     >
                       <span className={css.floatingText}>{media.fileName}</span>
-                      <img src={mp3} />
+                      <img src={fileIcon} />
                     </li>
                   );
               })

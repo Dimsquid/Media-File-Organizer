@@ -44,7 +44,11 @@ a {
   color: white;
   li {
     padding: 20px 0px 20px 40px;
-    font-size: 15px;
+    font-size: 16px;
+
+    span {
+      float: none;
+    }
   }
   .listFunction {
     &:hover {

@@ -1,5 +1,20 @@
+import { Playlists } from "./Models";
+export interface JJect {
+  playlist?: Playlist[];
+}
+
 export interface Songs {
   songs: Song[];
+}
+
+export interface Playlists {
+  playlist: Playlists[];
+}
+
+export interface Playlist {
+  id?: number;
+  name?: string;
+  songs?: Song[];
 }
 
 export interface Song {
