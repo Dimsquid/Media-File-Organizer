@@ -1,5 +1,6 @@
 import { Playlists } from "./Models";
 export interface JJect {
+  songs?: Song[];
   playlist?: Playlist[];
 }
 
