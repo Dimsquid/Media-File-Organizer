@@ -39,9 +39,10 @@ const createWindow = async () => {
     });
   }
 
-  win.webContents.once("dom-ready", () => {
-    win!.webContents.openDevTools();
-  });
+  // Uncomment for dev tools on prod
+  //   win.webContents.once("dom-ready", () => {
+  //     win!.webContents.openDevTools();
+  //   });
 
   win.on("closed", () => {
     win = null;
