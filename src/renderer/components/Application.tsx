@@ -1,9 +1,10 @@
 import { hot } from "react-hot-loader/root";
 import * as React from "react";
-import * as css from "./app.scss";
 import { Switch, Route, HashRouter } from "react-router-dom";
+
+import * as css from "./app.scss";
 import Sidebar from "../components/Sidebar/Sidebar";
-import SongsClass from "../Page/Songs/Songs";
+import MediaClass from "../Page/Media/Media";
 import Playlists from "../Page/Playlists/Playlists";
 import CategorieList from "../Page/Categories/Categories";
 import Modal from "./Modal/Modal";
@@ -24,7 +25,7 @@ export class Application extends React.Component<Props, State> {
     super(props);
     this.state = {
       jsonData: {
-        songs: [],
+        media: [],
         playlist: [],
         categories: [
           { value: 0, label: "Rock" },
@@ -71,9 +72,9 @@ export class Application extends React.Component<Props, State> {
     dialog.showSaveDialog(null as any, options, (path: any) => {
       fs.writeFile(path, JSON.stringify(this.state.jsonData), (err: any) => {
         if (err) {
-          alert("An error ocurred creating the file " + err.message);
+          alert("An error ocurred creating the file." + err.message);
         }
-        alert("The file has been succesfully saved");
+        alert("The file has been succesfully saved.");
       });
     });
   }
@@ -99,18 +100,18 @@ export class Application extends React.Component<Props, State> {
   }
 
   render() {
-    const { jsonData } = this.state;
+    const { jsonData, showModal } = this.state;
     if (jsonData) {
       return (
         <div className={css.container}>
-          <Sidebar saveCurrentState={this.saveCurrentState} loadStateFile={() => this.loadStateFile(this)} showModal={this.showModal} jsonData={jsonData} />
+          <Sidebar saveCurrentState={this.saveCurrentState} loadStateFile={this.loadStateFile} showModal={this.showModal} jsonData={jsonData} />
           <HashRouter>
             <Switch>
               <Route path="/playlist/:id" render={(props: any) => <Playlists {...props} updateJSON={this.fileWriter} jsonData={jsonData} />} />
-              <Route path="/" component={() => <SongsClass updateJSON={this.fileWriter} jsonData={jsonData} />} />
+              <Route path="/" component={() => <MediaClass updateJSON={this.fileWriter} jsonData={jsonData} />} />
             </Switch>
           </HashRouter>
-          {this.state.showModal && <Modal closeModal={this.showModal} title={"Category List"} content={<CategorieList updateJSON={this.fileWriter} jsonData={jsonData} />} />}
+          {showModal && <Modal closeModal={this.showModal} title={"Category List"} content={<CategorieList updateJSON={this.fileWriter} jsonData={jsonData} />} />}
         </div>
       );
     } else {

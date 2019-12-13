@@ -1,11 +1,11 @@
 import * as React from "react";
-import * as css from "../page.scss";
-import { Song, MousePosition, Playlist, JJect } from "../../Models";
-import fileIcon from "../../../images/file.svg";
-import InformationPopOver from "../../components/InformationPopOver/InformationPopOver";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faPen, faSave } from "@fortawesome/free-solid-svg-icons";
 import { Redirect } from "react-router";
+
+import * as css from "../page.scss";
+import { Media, MousePosition, Playlist, JJect } from "../../Models";
+import InformationPopOver from "../../components/InformationPopOver/InformationPopOver";
 import Modal from "../../components/Modal/Modal";
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
 }
 interface State {
   oldJSONData: any;
-  popUpData: Song;
+  popUpData: Media;
   mousePos: MousePosition;
   showPopOver: boolean;
   deletedReturn: boolean;
@@ -36,17 +36,20 @@ export default class Playlists extends React.Component<Props, State> {
       showModal: false
     };
     this.toggleModal = this.toggleModal.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
     this.saveNewName = this.saveNewName.bind(this);
   }
 
   onMouseMove(event: any) {
-    const mediaData = this.state.oldJSONData.songs[event.target.id];
+    const mediaData = this.state.oldJSONData.media[event.target.id];
     if (mediaData) {
-      const allData: Song = {
+      const allData: Media = {
         fileName: mediaData.fileName,
         filePath: mediaData.filePath,
         extension: mediaData.extension,
         comment: mediaData.comment ? mediaData.comment : "",
+        categories: mediaData.categories,
         id: mediaData.id
       };
       this.setState({
@@ -57,27 +60,19 @@ export default class Playlists extends React.Component<Props, State> {
     }
   }
 
-  onMouseLeave() {
-    this.setState({ showPopOver: !this.state.showPopOver });
-  }
-
-  componentDidMount() {
-    this.setState({ oldJSONData: this.props.jsonData });
-  }
-
   deletePlaylist(id: number) {
     const { oldJSONData } = this.state;
     const { updateJSON } = this.props;
-
-    if (oldJSONData.playlist[id]) {
-      let obj = {
-        songs: oldJSONData.songs,
-        playlist: oldJSONData.playlist.filter((playl: Playlist) => playl != oldJSONData.playlist[id]),
-        categories: oldJSONData.categories
-      };
-
-      updateJSON && updateJSON(obj);
-      this.setState({ deletedReturn: true });
+    if (confirm("Are you sure you would like to delete this playlist?")) {
+      if (oldJSONData.playlist[id]) {
+        let obj = {
+          media: oldJSONData.media,
+          playlist: oldJSONData.playlist.filter((playl: Playlist) => playl != oldJSONData.playlist[id]),
+          categories: oldJSONData.categories
+        };
+        updateJSON && updateJSON(obj);
+        this.setState({ deletedReturn: true });
+      }
     }
   }
 
@@ -85,7 +80,7 @@ export default class Playlists extends React.Component<Props, State> {
     return (
       <div className={css.nameChangeBar}>
         <li>
-          <input onChange={e => this.onChange(e)} placeholder="Change category name" type="text" />
+          <input onChange={e => this.onChange(e)} placeholder="Change playlist name" type="text" />
           <div className={css.editIcon}>
             <FontAwesomeIcon onClick={this.saveNewName} className={css.icons} icon={faSave} />
           </div>
@@ -94,28 +89,32 @@ export default class Playlists extends React.Component<Props, State> {
     );
   }
 
-  onChange(e: any) {
-    this.setState({
-      newCategoryObject: e.target.value
-    });
-  }
-
-  toggleModal() {
-    this.setState({
-      showModal: !this.state.showModal
-    });
-  }
-
   saveNewName() {
     const { newCategoryObject, oldJSONData } = this.state;
     oldJSONData.playlist[this.props.match.params.id].name = newCategoryObject;
     let obj: JJect = {
-      songs: oldJSONData.songs,
+      media: oldJSONData.media,
       playlist: oldJSONData.playlist,
       categories: oldJSONData.categories
     };
-    this.props.updateJSON && this.props.updateJSON("", obj);
+    this.props.updateJSON && this.props.updateJSON(obj);
     this.setState({ showModal: false });
+  }
+
+  onChange(e: any) {
+    this.setState({ newCategoryObject: e.target.value });
+  }
+
+  toggleModal() {
+    this.setState({ showModal: !this.state.showModal });
+  }
+
+  onMouseLeave() {
+    this.setState({ showPopOver: false });
+  }
+
+  componentDidMount() {
+    this.setState({ oldJSONData: this.props.jsonData });
   }
 
   render() {
@@ -131,34 +130,26 @@ export default class Playlists extends React.Component<Props, State> {
             Playlist: {oldJSONData && oldJSONData.playlist && oldJSONData.playlist[id] && oldJSONData.playlist[id].name}
             <span className={css.deletePlaylist}>
               <span className={css.icons}>
-                <FontAwesomeIcon onClick={() => this.toggleModal()} icon={faPen} />
+                <FontAwesomeIcon onClick={this.toggleModal} icon={faPen} />
               </span>
               <span className={css.icons}>
                 <FontAwesomeIcon onClick={() => this.deletePlaylist(id)} icon={faTrash} />
               </span>
             </span>
           </h1>
-
-          <div className={css.songHolder}>
+          <div className={css.mediaHolder}>
             <ul>
-              {oldJSONData && oldJSONData.playlist && oldJSONData.playlist[id] && oldJSONData.playlist[id].songs && oldJSONData.playlist[id].songs.length > 0 ? (
-                oldJSONData.playlist[id].songs.map((media: Song) => {
+              {oldJSONData && oldJSONData.playlist && oldJSONData.playlist[id] && oldJSONData.playlist[id].media && oldJSONData.playlist[id].media.length > 0 ? (
+                oldJSONData.playlist[id].media.map((media: Media) => {
                   return (
-                    <li
-                      onMouseMove={e => this.onMouseMove(e)}
-                      onMouseLeave={() => {
-                        this.onMouseLeave();
-                      }}
-                      className={css.thumbNail}
-                      key={`${media.fileName}_${media.id}`}
-                      id={media.id + ""}>
+                    <li onMouseMove={this.onMouseMove} onMouseLeave={this.onMouseLeave} className={css.thumbNail} key={`${media.fileName}_${media.id}`} id={media.id + ""}>
                       <span className={css.floatingText}>{media.fileName}</span>
-                      <img src={fileIcon} />
+                      <img src={media.image} />
                     </li>
                   );
                 })
               ) : (
-                <li>You havent saved any songs</li>
+                <li>You havent saved any media files</li>
               )}
             </ul>
           </div>

@@ -1,37 +1,38 @@
 export interface JJect {
-  songs?: Song[];
+  media?: Media[];
   playlist?: Playlist[];
   categories?: Category[];
 }
 
-export interface Songs {
-  songs: Song[];
+export interface Medias {
+  media: Media[];
 }
 
 export interface Playlists {
   playlist: Playlists[];
 }
-export interface Categorys {
+export interface Catergories {
   categories: Category[];
 }
 
 export interface Playlist {
   id?: number;
   name?: string;
-  songs?: Song[];
+  media?: Media[];
 }
 export interface Category {
   value: number;
   label: string;
 }
 
-export interface Song {
+export interface Media {
   id?: number;
   fileName?: string;
   filePath?: string;
   extension?: string;
   comment?: string;
   categories?: Category[];
+  image?: any;
 }
 
 export interface MousePosition {
@@ -42,8 +43,8 @@ export interface MousePosition {
 export enum ModalType {
   CreatePlaylist,
   ChooseMediaTypes,
-  AddSong,
-  AddSongToPlaylist,
-  EditSongInfo,
+  AddMedia,
+  AddMediaToPlaylist,
+  EditMediaInfo,
   Null
 }

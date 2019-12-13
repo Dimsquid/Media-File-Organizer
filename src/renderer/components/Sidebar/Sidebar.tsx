@@ -1,8 +1,9 @@
 import * as React from "react";
-import * as css from "./sidebar.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faSave, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { Link, HashRouter as Router } from "react-router-dom";
+
+import * as css from "./sidebar.scss";
 import { Playlist, JJect } from "../../Models";
 
 interface Props {
@@ -24,6 +25,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
       showPlaylist: false
     };
     this.showMenu = this.showMenu.bind(this);
+    this.showModal = this.showModal.bind(this);
   }
 
   showMenu() {
@@ -51,7 +53,7 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
     }
   }
 
-  modal() {
+  showModal() {
     this.props.showModal && this.props.showModal();
   }
 
@@ -63,13 +65,13 @@ export default class Sidebar extends React.Component<Props, SidebarState> {
           <ul>
             <Router>
               <Link to="/">
-                <li>Songs</li>
+                <li>Media</li>
               </Link>
               <li onClick={this.showMenu}>
                 Playlists <FontAwesomeIcon icon={faAngleDown} />
               </li>
               {this.state.showPlaylist ? <ul className={css.subMenuList}>{this.renderInPlaylistList()}</ul> : null}
-              <li onClick={() => this.modal()}>Categories</li>
+              <li onClick={this.showModal}>Categories</li>
               <li onClick={() => saveCurrentState && saveCurrentState()}>
                 Save State <FontAwesomeIcon icon={faSave} />
               </li>

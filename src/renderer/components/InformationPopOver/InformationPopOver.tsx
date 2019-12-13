@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Song, MousePosition } from "../../Models";
+import { Media, MousePosition, Category } from "../../Models";
 import * as css from "./informationpopover.scss";
 
 interface Props {
-  information: Song;
+  information: Media;
   moveToPosition: MousePosition;
 }
 interface State {
@@ -37,7 +37,7 @@ export default class InformationPopOver extends React.Component<Props, State> {
           <div>
             Categories:
             {this.props.information.categories &&
-              this.props.information.categories.map(element => {
+              this.props.information.categories.map((element: Category) => {
                 return <li key={`${element.value}_${element.label}`}>{element.label}</li>;
               })}
           </div>

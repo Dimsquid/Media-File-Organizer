@@ -1,15 +1,16 @@
 import * as React from "react";
-import * as css from "../page.scss";
-
-import InformationPopOver from "../../components/InformationPopOver/InformationPopOver";
-import fileIcon from "../../../images/file.svg";
-import { Song, MousePosition, Playlist, JJect, ModalType } from "../../Models";
-import { deleteSong } from "../../containers/FileFunctions";
-import Modal from "../../components/Modal/Modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faPlus, faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
 
+import * as css from "../page.scss";
+import InformationPopOver from "../../components/InformationPopOver/InformationPopOver";
+import fileIcon from "../../../images/file.svg";
+import { Media, MousePosition, Playlist, JJect, ModalType, Category } from "../../Models";
+import { deleteMedia } from "../../containers/FileFunctions";
+import Modal from "../../components/Modal/Modal";
+
+const fs = require("fs");
 const { dialog } = require("electron").remote;
 
 interface Props {
@@ -17,15 +18,14 @@ interface Props {
   updateJSON: Function;
 }
 
-interface SongState {
-  popUpData: Song;
+interface MediaState {
+  popUpData: Media;
   mousePos: MousePosition;
   showPopOver: boolean;
-  openedFileData: Song;
+  openedFileData: Media;
   oldJSONData: any;
   toggleClass: boolean;
-  selectedSong: number;
-  showPlaylistModal: boolean;
+  selectedMedia: number;
   showCreate: boolean;
   newPlaylistObject: Playlist;
   modalType: ModalType;
@@ -33,7 +33,7 @@ interface SongState {
   selectedMediaType: any;
 }
 
-export default class SongsClass extends React.Component<Props, SongState> {
+export default class MediaClass extends React.Component<Props, MediaState> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -55,10 +55,9 @@ export default class SongsClass extends React.Component<Props, SongState> {
       },
       oldJSONData: null,
       toggleClass: true,
-      selectedSong: NaN,
-      showPlaylistModal: false,
+      selectedMedia: NaN,
       showCreate: false,
-      newPlaylistObject: { id: 0, name: "", songs: [] },
+      newPlaylistObject: { id: 0, name: "", media: [] },
       modalType: ModalType.Null,
       selectedCategory: null,
       selectedMediaType: { id: null, label: null }
@@ -67,16 +66,15 @@ export default class SongsClass extends React.Component<Props, SongState> {
     this.playNameChange = this.playNameChange.bind(this);
     this.catergoryChange = this.catergoryChange.bind(this);
     this.mediaChange = this.mediaChange.bind(this);
-  }
-
-  componentDidMount() {
-    this.setState({ oldJSONData: this.props.jsonData });
+    this.onMouseLeave = this.onMouseLeave.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.toggleOptions = this.toggleOptions.bind(this);
   }
 
   onMouseMove(event: any) {
-    const mediaData = this.state.oldJSONData.songs[event.target.id];
+    const mediaData = this.state.oldJSONData.media[event.target.id];
     if (mediaData) {
-      const allData: Song = {
+      const allData: Media = {
         fileName: mediaData.fileName,
         filePath: mediaData.filePath,
         extension: mediaData.extension,
@@ -92,12 +90,9 @@ export default class SongsClass extends React.Component<Props, SongState> {
     }
   }
 
-  onMouseLeave() {
-    this.setState({ showPopOver: false });
-  }
-
   onChange(e: any) {
     const value = e.target.value ? e.target.value : "";
+    console.log(this.state.selectedCategory);
     this.setState(prevState => ({
       openedFileData: {
         ...prevState.openedFileData,
@@ -131,7 +126,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
           outsideThis.setState({
             openedFileData: { id: 0, fileName, filePath: files[0], extension }
           });
-          outsideThis.setModalType(ModalType.AddSong);
+          outsideThis.setModalType(ModalType.AddMedia);
         }
       }
     );
@@ -147,18 +142,14 @@ export default class SongsClass extends React.Component<Props, SongState> {
           this.createNewPlaylist();
         }
         break;
-      case ModalType.AddSong:
-        this.addNewSong();
+      case ModalType.AddMedia:
+        this.addNewMedia();
         break;
       case ModalType.ChooseMediaTypes:
         this.openFile(this);
         break;
     }
   }
-
-  catergoryChange = (selectedCategory: any) => {
-    this.setState({ selectedCategory: selectedCategory });
-  };
 
   modalBodyContent() {
     const { openedFileData, modalType, oldJSONData, selectedCategory, selectedMediaType } = this.state;
@@ -170,7 +161,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
             <input onChange={e => this.playNameChange(e)} type="text" />
           </div>
         );
-      case ModalType.AddSong:
+      case ModalType.AddMedia:
         return (
           <div className={css.modalBody}>
             <div>Chosen File: {openedFileData.fileName}</div>
@@ -194,13 +185,13 @@ export default class SongsClass extends React.Component<Props, SongState> {
             </div>
           </div>
         );
-      case ModalType.AddSongToPlaylist:
+      case ModalType.AddMediaToPlaylist:
         return (
-          <ul className={css.addSongsList}>
+          <ul className={css.addMediaList}>
             {oldJSONData.playlist && oldJSONData.playlist.length > 0 ? (
               oldJSONData.playlist.map((playl: Playlist) => {
                 return (
-                  <li className={css.thumbNail} key={`${playl.name}_${playl.id}`} id={playl.id + ""} onClick={e => this.addSongToPlaylist(e)}>
+                  <li className={css.thumbNail} key={`${playl.name}_${playl.id}`} id={playl.id + ""} onClick={e => this.addMediaToPlaylist(e)}>
                     <span className={css.floatingText}>{playl.name}</span>
                   </li>
                 );
@@ -252,59 +243,59 @@ export default class SongsClass extends React.Component<Props, SongState> {
     });
   };
 
-  addNewSong() {
-    const { openedFileData, oldJSONData } = this.state;
+  addNewMedia() {
+    const { selectedCategory, openedFileData, oldJSONData } = this.state;
     const { updateJSON } = this.props;
-    const songIndexStartingPoint = oldJSONData.songs.length;
+    const mediaIndexStartingPoint = oldJSONData.media.length;
 
-    if (oldJSONData.songs.some((song: Song) => song.filePath === openedFileData.filePath)) {
+    if (oldJSONData.media.some((media: Media) => media.filePath === openedFileData.filePath)) {
       alert("File already added to organiser..");
     } else {
-      oldJSONData.songs.push({
-        id: songIndexStartingPoint,
+      oldJSONData.media.push({
+        id: mediaIndexStartingPoint,
         fileName: openedFileData.fileName,
         filePath: openedFileData.filePath,
         extension: openedFileData.extension,
         comment: openedFileData.comment,
-        categories: openedFileData.categories
+        categories: selectedCategory,
+        image: fileIcon
       });
     }
     updateJSON && updateJSON(oldJSONData);
-    this.setState({ openedFileData: {} });
+    this.setState({ openedFileData: {}, selectedCategory: {} });
     this.setModalType(ModalType.Null);
   }
 
   deleteItem() {
-    const { selectedSong, oldJSONData } = this.state;
+    const { selectedMedia, oldJSONData } = this.state;
     const { updateJSON } = this.props;
-    updateJSON && updateJSON(deleteSong(oldJSONData, selectedSong));
-    this.setState({ selectedSong: NaN });
+    updateJSON && updateJSON(deleteMedia(oldJSONData, selectedMedia));
+    this.setState({ selectedMedia: NaN });
   }
 
-  addSongToPlaylist(e: any) {
-    const { selectedSong, oldJSONData } = this.state;
+  addMediaToPlaylist(e: any) {
+    const { selectedMedia, oldJSONData } = this.state;
     const { updateJSON } = this.props;
-    let newestObj = oldJSONData.songs[selectedSong];
+    let newestObj = oldJSONData.media[selectedMedia];
 
-    if (oldJSONData.playlist[e.target.id] && oldJSONData.playlist[e.target.id].songs.length > oldJSONData.songs[selectedSong].id) {
-      newestObj = Object.assign({}, oldJSONData.songs[selectedSong], {
-        id: oldJSONData.playlist[e.target.id].songs.length
+    if (oldJSONData.playlist[e.target.id] && oldJSONData.playlist[e.target.id].media && oldJSONData.playlist[e.target.id].media.length > oldJSONData.media[selectedMedia].id) {
+      newestObj = Object.assign({}, oldJSONData.media[selectedMedia], {
+        id: oldJSONData.playlist[e.target.id].media.length
       });
     } else {
-      newestObj = Object.assign({}, oldJSONData.songs[selectedSong], {
+      newestObj = Object.assign({}, oldJSONData.media[selectedMedia], {
         id: 0
       });
-      oldJSONData.playlist[e.target.id].songs.push(newestObj);
+      oldJSONData.playlist[e.target.id].media.push(newestObj);
       updateJSON && updateJSON(oldJSONData);
       this.setState({
-        selectedSong: NaN,
-        showPlaylistModal: !this.state.showPlaylistModal
+        selectedMedia: NaN
       });
       return;
     }
-    oldJSONData.playlist[e.target.id].songs.map((song: any) => {
-      if (oldJSONData.songs[selectedSong].filePath != song.filePath) {
-        oldJSONData.playlist[e.target.id].songs.push(newestObj);
+    oldJSONData.playlist[e.target.id].media.map((media: any) => {
+      if (oldJSONData.media[selectedMedia].filePath != media.filePath) {
+        oldJSONData.playlist[e.target.id].media.push(newestObj);
         updateJSON && updateJSON(oldJSONData);
       } else {
         alert("File already added to this playlist..");
@@ -312,8 +303,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
     });
 
     this.setState({
-      selectedSong: NaN,
-      showPlaylistModal: !this.state.showPlaylistModal
+      selectedMedia: NaN
     });
   }
 
@@ -338,37 +328,114 @@ export default class SongsClass extends React.Component<Props, SongState> {
     }));
   }
 
+  addImageToFile(outsideThis: this) {
+    const { selectedMedia, oldJSONData } = this.state;
+    dialog.showOpenDialog(
+      {
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "FooFiles",
+            extensions: ["jpg", "png"]
+          }
+        ]
+      },
+      function(files) {
+        if (files !== undefined) {
+          oldJSONData.media[selectedMedia].image = "data:image/jpg;base64," + fs.readFileSync(files[0]).toString("base64");
+          let obj: JJect = {
+            media: oldJSONData.media,
+            playlist: oldJSONData.playlist,
+            categories: oldJSONData.categories
+          };
+          outsideThis.props.updateJSON && outsideThis.props.updateJSON(obj);
+        }
+      }
+    );
+  }
+
+  editComment(e: any) {
+    const { selectedMedia, oldJSONData } = this.state;
+    if (e.key === "Enter") {
+      oldJSONData.media[selectedMedia].comment = e.target.value;
+      let obj: JJect = {
+        media: oldJSONData.media,
+        playlist: oldJSONData.playlist,
+        categories: oldJSONData.categories
+      };
+      this.props.updateJSON && this.props.updateJSON(obj);
+    }
+  }
+
   getSelectedContent() {
-    const { oldJSONData, selectedSong } = this.state;
-    if (oldJSONData && oldJSONData.songs && oldJSONData.songs[selectedSong]) {
+    const { oldJSONData, selectedMedia } = this.state;
+    if (oldJSONData && oldJSONData.media && oldJSONData.media[selectedMedia]) {
+      const initialValue = oldJSONData.media[selectedMedia].comment;
       return (
         <div className={css.builtContent}>
-          {oldJSONData.songs[selectedSong].fileName}
+          {oldJSONData.media[selectedMedia].fileName}
           <div className={css.buttonHolder}>
-            <button onClick={() => alert("Remember to add")} className={css.editMedia}>
-              Edit information <FontAwesomeIcon icon={faPen} />
-            </button>
-            <button onClick={() => this.setModalType(ModalType.AddSongToPlaylist)}>
+            <button onClick={() => this.setModalType(ModalType.AddMediaToPlaylist)}>
               Add to playlist <FontAwesomeIcon icon={faPlus} />
             </button>
             <button onClick={() => this.deleteItem()} className={css.deleteMedia}>
               Delete media <FontAwesomeIcon icon={faTrash} />
             </button>
           </div>
+          <div className={css.editMedia}>
+            <div onClick={() => this.addImageToFile(this)} className={css.thumbNail}>
+              <img src={oldJSONData.media[selectedMedia].image} />
+            </div>
+            <div className={css.fileDetails}>
+              <table className={css.editAbleOptions}>
+                <tr>
+                  <td>File Name:</td>
+                  <td>{oldJSONData.media[selectedMedia].fileName}</td>
+                </tr>
+                <tr>
+                  <td>File Type:</td>
+                  <td>{oldJSONData.media[selectedMedia].extension}</td>
+                </tr>
+                <tr>
+                  <td>File Location:</td>
+                  <td>{oldJSONData.media[selectedMedia].filePath}</td>
+                </tr>
+                <tr>
+                  <td>Comment:</td>
+                  <td>
+                    <input type="text" onKeyPress={e => this.editComment(e)} placeholder={initialValue} />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Category:</td>
+                  <td>
+                    {oldJSONData.media[selectedMedia].categories &&
+                      oldJSONData.media[selectedMedia].categories.map((category: Category) => {
+                        return category.label;
+                      })}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
         </div>
       );
     }
   }
 
-  toggleOptions(e: any) {
-    this.setState({
-      toggleClass: !this.state.toggleClass,
-      selectedSong: this.state.toggleClass ? e.target.id : NaN
-    });
+  componentDidMount() {
+    this.setState({ oldJSONData: this.props.jsonData });
   }
 
-  togglePlaylistModal() {
-    this.setState({ showPlaylistModal: !this.state.showPlaylistModal });
+  onMouseLeave() {
+    this.setState({ showPopOver: false });
+  }
+  catergoryChange = (selectedCategory: any) => {
+    this.setState({ selectedCategory: selectedCategory });
+  };
+
+  toggleOptions(e: any) {
+    this.setState({ toggleClass: !this.state.toggleClass, selectedMedia: this.state.toggleClass ? e.target.id : NaN });
   }
 
   toggleCreatePlaylist() {
@@ -380,18 +447,18 @@ export default class SongsClass extends React.Component<Props, SongState> {
   }
 
   render() {
-    const { showPopOver, mousePos, popUpData, oldJSONData, toggleClass, showPlaylistModal, modalType } = this.state;
+    const { showPopOver, mousePos, popUpData, oldJSONData, toggleClass, modalType } = this.state;
 
     let modalTitle;
     switch (modalType) {
       case ModalType.CreatePlaylist:
         modalTitle = "Create Playlist";
         break;
-      case ModalType.AddSong:
+      case ModalType.AddMedia:
         modalTitle = "Add Media File";
         break;
-      case ModalType.AddSongToPlaylist:
-        modalTitle = "Add Song to Playlist";
+      case ModalType.AddMediaToPlaylist:
+        modalTitle = "Add Media to Playlist";
         break;
       case ModalType.ChooseMediaTypes:
         modalTitle = "Choose File Type";
@@ -402,11 +469,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
     }
 
     return (
-      <div
-        style={{
-          pointerEvents: modalType != ModalType.Null || showPlaylistModal ? "none" : "all"
-        }}
-        className={css.container}>
+      <div className={css.container}>
         {modalType != ModalType.Null && (
           <Modal
             title={modalTitle}
@@ -416,7 +479,7 @@ export default class SongsClass extends React.Component<Props, SongState> {
             showButtons={true}
           />
         )}
-        <h1>Songs</h1>
+        <h1>Media Files</h1>
         <div className={css.buttonHolder}>
           <button onClick={() => this.setModalType(ModalType.ChooseMediaTypes)}>
             <span className={css.floatingText}>Add a new file</span>
@@ -425,34 +488,32 @@ export default class SongsClass extends React.Component<Props, SongState> {
             <span className={css.floatingText}>Create new playlist</span>
           </button>
         </div>
-        <div className={css.songHolder}>
+        <div className={css.mediaHolder}>
           <ul>
-            {oldJSONData && oldJSONData.songs != null && oldJSONData.songs.length > 0 ? (
-              oldJSONData.songs.map((media: Song) => {
+            {oldJSONData && oldJSONData.media != null && oldJSONData.media.length > 0 ? (
+              oldJSONData.media.map((media: Media) => {
                 return (
                   <li
-                    onMouseMove={e => this.onMouseMove(e)}
-                    onMouseLeave={() => {
-                      this.onMouseLeave();
-                    }}
-                    onClick={e => this.toggleOptions(e)}
+                    onMouseMove={this.onMouseMove}
+                    onMouseLeave={this.onMouseLeave}
+                    onClick={this.toggleOptions}
                     className={css.thumbNail}
                     key={`${media.fileName}_${media.id}`}
                     id={media.id + ""}>
                     <span className={css.floatingText}>{media.fileName}</span>
-                    <img src={fileIcon} />
+                    <img src={media.image} />
                   </li>
                 );
               })
             ) : (
-              <li>You havent saved any songs</li>
+              <li>You havent saved any media files</li>
             )}
           </ul>
           {showPopOver && <InformationPopOver information={popUpData} moveToPosition={mousePos} />}
         </div>
         <div className={`${css.slider} ${toggleClass ? css.close : ""}`}>
           <div className={css.closeIcon}>
-            <FontAwesomeIcon onClick={e => this.toggleOptions(e)} icon={faTimes} />
+            <FontAwesomeIcon onClick={this.toggleOptions} icon={faTimes} />
           </div>
           <div className={css.content}>{this.getSelectedContent()}</div>
         </div>

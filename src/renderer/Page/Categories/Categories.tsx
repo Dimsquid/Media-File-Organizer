@@ -1,9 +1,9 @@
 import * as React from "react";
-import { JJect, Category } from "../../Models";
-import * as css from "./categories.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faSave } from "@fortawesome/free-solid-svg-icons";
 
+import { JJect, Category } from "../../Models";
+import * as css from "./categories.scss";
 interface Props {
   jsonData: JJect;
   showModal?: Function;
@@ -16,7 +16,6 @@ interface State {
   showEditBar: boolean;
   selectedCategory: number;
   newCategoryObject: Category;
-  update: any;
 }
 
 export default class CategorieList extends React.Component<Props, State> {
@@ -27,11 +26,11 @@ export default class CategorieList extends React.Component<Props, State> {
       jsonData: null,
       showEditBar: false,
       selectedCategory: NaN,
-      newCategoryObject: { value: 0, label: "" },
-      update: null
+      newCategoryObject: { value: 0, label: "" }
     };
     this.toggleModal = this.toggleModal.bind(this);
     this.saveNewName = this.saveNewName.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
   componentDidMount() {
@@ -62,13 +61,14 @@ export default class CategorieList extends React.Component<Props, State> {
 
   saveNewName() {
     const { newCategoryObject, selectedCategory, jsonData, categorieData } = this.state;
+    const { updateJSON } = this.props;
     categorieData[selectedCategory] = newCategoryObject;
     let obj: JJect = {
-      songs: jsonData.songs,
+      media: jsonData.media,
       playlist: jsonData.playlist,
       categories: categorieData
     };
-    this.props.updateJSON && this.props.updateJSON(obj);
+    updateJSON && updateJSON(obj);
     this.setState({ showEditBar: false });
   }
 
@@ -98,7 +98,7 @@ export default class CategorieList extends React.Component<Props, State> {
             ) : (
               <div className={css.nameChangeBar}>
                 <li>
-                  <input onChange={e => this.onChange(e)} placeholder="Change category name" type="text" />
+                  <input onChange={this.onChange} placeholder="Change category name" type="text" />
                   <FontAwesomeIcon onClick={this.saveNewName} className={css.icons} icon={faSave} />
                 </li>
               </div>

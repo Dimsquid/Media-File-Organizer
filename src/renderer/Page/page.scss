@@ -51,7 +51,7 @@ h1 {
   width: calc(100% - 200px);
   left: 200px;
   bottom: 0;
-  height: 130px;
+  height: 100%;
   overflow: hidden;
   transition: all 1s;
   color: white;
@@ -107,7 +107,7 @@ h1 {
   margin-right: 20px;
 }
 
-.songHolder {
+.mediaHolder {
   width: 95%;
   margin: 50px auto 50px auto;
   height: calc(100vh - 200px);
@@ -143,8 +143,8 @@ h1 {
     }
 
     img {
-      height: auto;
-      width: auto;
+      height: 100%;
+      width: 100%;
       max-width: 150px;
       max-height: 150px;
       pointer-events: none;
@@ -176,7 +176,7 @@ h1 {
   color: black;
 }
 
-.addSongsList {
+.addMediaList {
   height: auto;
   max-height: 300px;
   overflow-y: scroll;
@@ -224,4 +224,43 @@ h1 {
 .icons {
   margin-left: 10px;
   cursor: pointer;
+}
+
+.editMedia {
+  color: white;
+  text-align: left;
+  padding: 20px;
+  .thumbNail {
+    float: left;
+    height: 150px;
+    width: 150px;
+    padding: 20px;
+    display: inline-block;
+    margin: 5px;
+    box-shadow: 3px 3px 12px black;
+    cursor: pointer !important;
+    &:hover {
+      transform: scale(1.05);
+    }
+    img {
+      height: 100%;
+      width: 100%;
+      max-width: 150px;
+      max-height: 150px;
+      pointer-events: none;
+      cursor: pointer;
+    }
+  }
+
+  .fileDetails {
+    display: inline-block;
+    height: 150px;
+    margin-left: 20px;
+
+    .editAbleOptions {
+      td {
+        padding: 10px;
+      }
+    }
+  }
 }

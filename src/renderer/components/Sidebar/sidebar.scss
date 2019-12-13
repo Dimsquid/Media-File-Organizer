@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto&display=swap");
+@import "../../../global";
 
 .container {
   height: 100vh;
@@ -6,53 +7,29 @@
   max-width: 200px;
   overflow: scroll;
   font-family: "Roboto", sans-serif;
-}
 
-.listTypes {
-  margin-top: 0px;
-}
+  .listTypes {
+    margin-top: 0px;
 
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  li {
-    background-color: #324559;
-    color: white;
-    border-bottom: 2px solid #2c3e50;
-    border-bottom: 2px solid #2c3e50;
-    padding: 20px 0 20px 20px;
-    font-size: 18px;
-    cursor: pointer;
-    &:hover {
-      background-color: #283747;
+    a {
+      all: unset;
     }
-    span {
-      float: right;
-      padding-right: 20px;
-      font-size: 14px;
-    }
-  }
-}
 
-a {
-  all: unset;
-}
+    .subMenuList {
+      color: white;
+      li {
+        padding: 20px 0px 20px 40px;
+        font-size: 16px;
 
-.subMenuList {
-  color: white;
-  li {
-    padding: 20px 0px 20px 40px;
-    font-size: 16px;
-
-    span {
-      float: none;
-    }
-  }
-  .listFunction {
-    &:hover {
-      color: greenyellow;
+        span {
+          float: none;
+        }
+      }
+      .listFunction {
+        &:hover {
+          color: greenyellow;
+        }
+      }
     }
   }
 }

@@ -1,7 +1,8 @@
 import * as React from "react";
-import * as css from "./modal.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+
+import * as css from "./modal.scss";
 
 interface Props {
   title?: string;
@@ -19,22 +20,22 @@ export default class Modal extends React.Component<Props, State> {
   }
 
   render() {
-    const { title, content } = this.props;
+    const { title, content, closeModal, showButtons, saveButton } = this.props;
     return (
       <div className={css.overlay}>
         <div className={css.modalBody}>
           <div className={css.topBar}>
             <div className={css.modalTitle}>{title}</div>
             <div className={css.closeIcon}>
-              <FontAwesomeIcon onClick={e => this.props.closeModal && this.props.closeModal(e)} icon={faTimes} />
+              <FontAwesomeIcon onClick={e => closeModal && closeModal(e)} icon={faTimes} />
             </div>
           </div>
           <div className={css.content}>{content}</div>
-          {this.props.showButtons ? (
+          {showButtons ? (
             <div className={css.footer}>
               <div className={css.buttonHolder}>
-                <button onClick={e => this.props.saveButton && this.props.saveButton(e)}>Save</button>
-                <button onClick={e => this.props.closeModal && this.props.closeModal(e)}>Close</button>
+                <button onClick={e => saveButton && saveButton(e)}>Save</button>
+                <button onClick={e => closeModal && closeModal(e)}>Close</button>
               </div>
             </div>
           ) : null}

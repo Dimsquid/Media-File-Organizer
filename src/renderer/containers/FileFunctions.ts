@@ -1,10 +1,10 @@
-import { JJect, Song } from "./../Models";
+import { JJect, Media } from "./../Models";
 
-export function deleteSong(oldJSONData: any, selectedSong: any) {
+export function deleteMedia(oldJSONData: any, selectedMedia: any) {
   if (confirm("Are you sure you want to delete this file?")) {
-    if (oldJSONData.songs[selectedSong]) {
+    if (oldJSONData.media[selectedMedia]) {
       let obj: JJect = {
-        songs: oldJSONData.songs.filter((song: Song) => song != oldJSONData.songs[selectedSong]),
+        media: oldJSONData.media.filter((media: Media) => media != oldJSONData.media[selectedMedia]),
         playlist: oldJSONData.playlist,
         categories: oldJSONData.categories
       };
