@@ -104,7 +104,7 @@ export class Application extends React.Component<Props, State> {
     if (jsonData) {
       return (
         <div className={css.container}>
-          <Sidebar saveCurrentState={this.saveCurrentState} loadStateFile={this.loadStateFile} showModal={this.showModal} jsonData={jsonData} />
+          <Sidebar saveCurrentState={this.saveCurrentState} loadStateFile={() => this.loadStateFile(this)} showModal={this.showModal} jsonData={jsonData} />
           <HashRouter>
             <Switch>
               <Route path="/playlist/:id" render={(props: any) => <Playlists {...props} updateJSON={this.fileWriter} jsonData={jsonData} />} />
